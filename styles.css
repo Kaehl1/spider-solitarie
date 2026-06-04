@@ -1,25 +1,42 @@
 :root {
-    --bg-body: #1e1e21;        /* Fondo principal oscuro suave */
-    --bg-header: #27272a;      /* Fondo de la barra superior */
-    --text-main: #a1a1aa;      /* Texto gris suave (sin blancos puros) */
-    --text-highlight: #d4d4d8; /* Texto un poco más claro para títulos */
-    --card-front: #ebe6da;     /* Fondo de carta boca arriba (crema clarito) */
-    --card-suit: #3f3f46;      /* Texto y palo oscuro para contraste suave en la carta */
-    --card-back: #353539;      /* Fondo de carta boca abajo */
-    --border-soft: #444448;    /* Bordes suaves */
-    --border-card: #d1ccbf;    /* Borde de cartas (crema un poco más oscuro) */
-    --suit-color: #8fa3c0;     /* Color azul/pizarra para las picas (bajo contraste) */
-    --empty-slot: #242427;     /* Ranura vacía */
+    /* Nueva paleta Azul/Grisáceo Terciopelo */
+    --bg-body: #0d131f;        /* Azul oscuro muy profundo de base */
+    --bg-header: rgba(17, 24, 39, 0.85); /* Cabecera translúcida oscura */
+    --text-main: #ebe6da;      /* Gris azulado para texto secundario */
+    --text-highlight: #e2e8f0; /* Blanco azulado para títulos */
+    
+    /* Colores de las cartas (mantenidos) */
+    --card-front: #ebe6da;     
+    --card-suit: #000000;      
+    --card-back: #353539;      
+    --border-soft: rgba(255, 255, 255, 0.1); 
+    --border-card: #d1ccbf;    
+    --suit-color: #8fa3c0;     
+    --empty-slot: rgba(0, 0, 0, 0.25); /* Ranura más oscura para que resalte en el tapete */
 }
 
 body {
     background-color: var(--bg-body);
+    
+    /* Efecto Tapete Terciopelo: Textura SVG incrustada + Foco de luz radial */
+    background-image: 
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E"),
+        radial-gradient(circle at 50% 35%, #243550 0%, #0d131f 85%);
+    background-attachment: fixed;
+    background-size: 150px, 100% 100%;
+    
     color: var(--text-main);
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
-    user-select: none; /* Evitar selección de texto al arrastrar */
+    user-select: none;
     overflow-x: hidden;
+}
+
+/* Añadimos un pequeño filtro de desenfoque a la cabecera para que quede moderna sobre el terciopelo */
+header {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .card {
@@ -61,7 +78,7 @@ body {
     background-color: var(--card-back);
     border: 3px solid var(--card-front); /* Borde claro estilo naipe real */
     /* Uso de la imagen proporcionada para el reverso */
-    background-image: url('Gemini_Generated_Image_gcazzwgcazzwgcaz.png');
+    background-image: url('./img/Dorso.png');
     background-size: cover;
     background-position: center;
     box-shadow: 0 1px 3px rgba(0,0,0,0.4);

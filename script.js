@@ -12,6 +12,8 @@ let draggedCardsData = [];
 let ghostEl = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
+let dragStartX = 0;
+let dragStartY = 0;
 let isAnimating = false; // Bloquea interacción durante animaciones
 
 const rankTexts = {1: 'A', 11: 'J', 12: 'Q', 13: 'K'};
@@ -138,13 +140,78 @@ function createCardElement(card) {
     el.className = `card select-none ${card.faceUp ? 'face-up' : 'face-down'}`;
     
     if (card.faceUp) {
+        const isFaceCard = card.rank > 10;
+        let faceImageSrc = '';
+
+        if (card.rank === 13) {
+            faceImageSrc = './img/rey.png';
+        } else if (card.rank === 12) {
+            faceImageSrc = './img/reina.png';
+        } else if (card.rank === 11) {
+            faceImageSrc = './img/sota.png';
+        }
+
+        let pipsHTML = '';
+        if (!isFaceCard) {
+            if (card.rank === 1) {
+                pipsHTML = `<span class="text-[clamp(4rem,6.5vw,5.5rem)] suit-icon absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 leading-none">♠</span>`;
+            } else {
+                // Ajuste de tamaño: un pelín más pequeño (de 2.2rem a 1.8rem) para evitar solapamientos
+                const addPip = (x, y, flip = false) => {
+                    return `<span class="absolute suit-icon text-[clamp(1.2rem,2.8vw,1.8rem)] transform -translate-x-1/2 -translate-y-1/2 ${flip ? 'rotate-180' : ''} leading-none" style="left: ${x}%; top: ${y}%;">♠</span>`;
+                };
+                
+                const pips = [];
+                const L = 25, C = 50, R = 75; 
+                
+                switch(card.rank) {
+                    case 2:
+                        pips.push(addPip(C, 20), addPip(C, 80, true));
+                        break;
+                    case 3:
+                        pips.push(addPip(C, 20), addPip(C, 50), addPip(C, 80, true));
+                        break;
+                    case 4:
+                        pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 80, true), addPip(R, 80, true));
+                        break;
+                    case 5:
+                        pips.push(addPip(L, 20), addPip(R, 20), addPip(C, 50), addPip(L, 80, true), addPip(R, 80, true));
+                        break;
+                    case 6:
+                        pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 50), addPip(R, 50), addPip(L, 80, true), addPip(R, 80, true));
+                        break;
+                    case 7:
+                        pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 50), addPip(R, 50), addPip(C, 35), addPip(L, 80, true), addPip(R, 80, true));
+                        break;
+                    case 8:
+                        pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 50), addPip(R, 50), addPip(C, 35), addPip(C, 65, true), addPip(L, 80, true), addPip(R, 80, true));
+                        break;
+                    case 9:
+                        // Ajuste milimétrico para el 9
+                        pips.push(addPip(L, 15), addPip(R, 15), addPip(L, 38), addPip(R, 38), addPip(C, 50), addPip(L, 62, true), addPip(R, 62, true), addPip(L, 85, true), addPip(R, 85, true));
+                        break;
+                    case 10:
+                        // Estiramos el 10: extremos a 14 y 86 para separar y dar aire al centro
+                        pips.push(addPip(L, 14), addPip(R, 14), addPip(L, 38), addPip(R, 38), addPip(C, 26), addPip(C, 74, true), addPip(L, 62, true), addPip(R, 62, true), addPip(L, 86, true), addPip(R, 86, true));
+                        break;
+                }
+                pipsHTML = pips.join('');
+            }
+        }
+
         el.innerHTML = `
-            <div class="absolute top-1 left-1.5 flex flex-col items-center">
-                <span class="text-[clamp(0.7rem,1.5vw,1.1rem)] font-bold suit-text leading-tight">${getRankText(card.rank)}</span>
-                <span class="text-[clamp(0.8rem,1.5vw,1.1rem)] suit-icon leading-tight">♠</span>
+            <div class="absolute top-1 left-1.5 z-10">
+                <span class="text-[clamp(1rem,2vw,1.3rem)] font-bold suit-text leading-none">${getRankText(card.rank)}</span>
             </div>
-            <div class="absolute inset-0 flex items-center justify-center opacity-70 pointer-events-none">
-                <span class="text-[clamp(2.5rem,4vw,4rem)] suit-icon">♠</span>
+            <div class="absolute top-1 right-1.5 z-10">
+                <span class="text-[clamp(1.2rem,2.2vw,1.5rem)] suit-icon leading-none">♠</span>
+            </div>
+            
+            <div class="absolute top-8 bottom-2 inset-x-2 pointer-events-none ${isFaceCard ? 'flex items-center justify-center overflow-hidden' : ''}">
+                ${isFaceCard 
+                    ? `<img src="${faceImageSrc}" class="w-full h-full object-contain opacity-95 drop-shadow-sm" alt="Figura">`
+                    : pipsHTML
+                }
             </div>
         `;
     }
@@ -463,6 +530,9 @@ function onPointerDown(e) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     
+    dragStartX = clientX;
+    dragStartY = clientY;
+    
     dragOffsetX = clientX - rect.left;
     dragOffsetY = clientY - rect.top;
 
@@ -498,6 +568,8 @@ function onPointerDown(e) {
     document.addEventListener('touchmove', onPointerMove, {passive: false});
     document.addEventListener('pointerup', onPointerUp);
     document.addEventListener('touchend', onPointerUp);
+    document.addEventListener('pointercancel', onPointerUp);
+    document.addEventListener('touchcancel', onPointerUp);
 }
 
 function onPointerMove(e) {
@@ -544,6 +616,26 @@ function onPointerUp(e) {
             const targetTopCard = targetCol[targetCol.length - 1];
             if (targetTopCard.rank - 1 === draggedTopCard.rank) {
                 moveValid = true; 
+            }
+        }
+    }
+
+    const moveDistance = Math.sqrt(Math.pow(clientX - dragStartX, 2) + Math.pow(clientY - dragStartY, 2));
+
+    if (targetColIdx === dragOriginCol && moveDistance < 10) {
+        for (let i = 0; i < 10; i++) {
+            if (i === dragOriginCol) continue;
+            
+            const targetCol = tableau[i];
+            const draggedTopCard = draggedCardsData[0];
+
+            if (targetCol.length > 0) {
+                const targetTopCard = targetCol[targetCol.length - 1];
+                if (targetTopCard.rank - 1 === draggedTopCard.rank) {
+                    targetColIdx = i;
+                    moveValid = true;
+                    break;
+                }
             }
         }
     }
