@@ -154,9 +154,10 @@ function createCardElement(card) {
         let pipsHTML = '';
         if (!isFaceCard) {
             if (card.rank === 1) {
-                pipsHTML = `<span class="text-[clamp(4rem,6.5vw,5.5rem)] suit-icon absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 leading-none">♠</span>`;
+                // El As siempre tiene una sola pica gigante (PC y Móvil)
+                pipsHTML = `<div class="w-full h-full flex items-center justify-center"><span class="text-[clamp(3.5rem,6.5vw,5.5rem)] suit-icon leading-none">♠</span></div>`;
             } else {
-                // Ajuste de tamaño: un pelín más pequeño (de 2.2rem a 1.8rem) para evitar solapamientos
+                // --- 1. DISEÑO PARA PC (Patrón clásico completo) ---
                 const addPip = (x, y, flip = false) => {
                     return `<span class="absolute suit-icon text-[clamp(1.2rem,2.8vw,1.8rem)] transform -translate-x-1/2 -translate-y-1/2 ${flip ? 'rotate-180' : ''} leading-none" style="left: ${x}%; top: ${y}%;">♠</span>`;
                 };
@@ -165,51 +166,46 @@ function createCardElement(card) {
                 const L = 25, C = 50, R = 75; 
                 
                 switch(card.rank) {
-                    case 2:
-                        pips.push(addPip(C, 20), addPip(C, 80, true));
-                        break;
-                    case 3:
-                        pips.push(addPip(C, 20), addPip(C, 50), addPip(C, 80, true));
-                        break;
-                    case 4:
-                        pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 80, true), addPip(R, 80, true));
-                        break;
-                    case 5:
-                        pips.push(addPip(L, 20), addPip(R, 20), addPip(C, 50), addPip(L, 80, true), addPip(R, 80, true));
-                        break;
-                    case 6:
-                        pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 50), addPip(R, 50), addPip(L, 80, true), addPip(R, 80, true));
-                        break;
-                    case 7:
-                        pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 50), addPip(R, 50), addPip(C, 35), addPip(L, 80, true), addPip(R, 80, true));
-                        break;
-                    case 8:
-                        pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 50), addPip(R, 50), addPip(C, 35), addPip(C, 65, true), addPip(L, 80, true), addPip(R, 80, true));
-                        break;
-                    case 9:
-                        // Ajuste milimétrico para el 9
-                        pips.push(addPip(L, 15), addPip(R, 15), addPip(L, 38), addPip(R, 38), addPip(C, 50), addPip(L, 62, true), addPip(R, 62, true), addPip(L, 85, true), addPip(R, 85, true));
-                        break;
-                    case 10:
-                        // Estiramos el 10: extremos a 14 y 86 para separar y dar aire al centro
-                        pips.push(addPip(L, 14), addPip(R, 14), addPip(L, 38), addPip(R, 38), addPip(C, 26), addPip(C, 74, true), addPip(L, 62, true), addPip(R, 62, true), addPip(L, 86, true), addPip(R, 86, true));
-                        break;
+                    case 2: pips.push(addPip(C, 20), addPip(C, 80, true)); break;
+                    case 3: pips.push(addPip(C, 20), addPip(C, 50), addPip(C, 80, true)); break;
+                    case 4: pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 80, true), addPip(R, 80, true)); break;
+                    case 5: pips.push(addPip(L, 20), addPip(R, 20), addPip(C, 50), addPip(L, 80, true), addPip(R, 80, true)); break;
+                    case 6: pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 50), addPip(R, 50), addPip(L, 80, true), addPip(R, 80, true)); break;
+                    case 7: pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 50), addPip(R, 50), addPip(C, 35), addPip(L, 80, true), addPip(R, 80, true)); break;
+                    case 8: pips.push(addPip(L, 20), addPip(R, 20), addPip(L, 50), addPip(R, 50), addPip(C, 35), addPip(C, 65, true), addPip(L, 80, true), addPip(R, 80, true)); break;
+                    case 9: pips.push(addPip(L, 15), addPip(R, 15), addPip(L, 38), addPip(R, 38), addPip(C, 50), addPip(L, 62, true), addPip(R, 62, true), addPip(L, 85, true), addPip(R, 85, true)); break;
+                    case 10: pips.push(addPip(L, 14), addPip(R, 14), addPip(L, 38), addPip(R, 38), addPip(C, 26), addPip(C, 74, true), addPip(L, 62, true), addPip(R, 62, true), addPip(L, 86, true), addPip(R, 86, true)); break;
                 }
-                pipsHTML = pips.join('');
+                
+                // Envolvemos el patrón clásico para que solo se vea en PC (sm:block)
+                const desktopPattern = `<div class="hidden sm:block w-full h-full relative">${pips.join('')}</div>`;
+                
+                // --- 2. DISEÑO PARA MÓVIL (Una sola pica gigante) ---
+                // Se centra con Flexbox y solo se ve en móvil (sm:hidden)
+                const mobilePattern = `
+                    <div class="flex sm:hidden w-full h-full items-center justify-center">
+                        <span class="text-[clamp(2.5rem,10vw,4rem)] suit-icon leading-none">♠</span>
+                    </div>
+                `;
+
+                // Unimos ambos diseños
+                pipsHTML = desktopPattern + mobilePattern;
             }
         }
 
         el.innerHTML = `
-            <div class="absolute top-1 left-1.5 z-10">
-                <span class="text-[clamp(1rem,2vw,1.3rem)] font-bold suit-text leading-none">${getRankText(card.rank)}</span>
+            <div class="absolute top-1 left-1 z-10">
+                <span class="text-[clamp(0.9rem,3vw,1.3rem)] font-bold suit-text leading-none">${getRankText(card.rank)}</span>
             </div>
-            <div class="absolute top-1 right-1.5 z-10">
-                <span class="text-[clamp(1.2rem,2.2vw,1.5rem)] suit-icon leading-none">♠</span>
+            <div class="absolute top-1 right-1 z-10">
+                <span class="text-[clamp(1.1rem,3.5vw,1.5rem)] suit-icon leading-none">♠</span>
             </div>
             
-            <div class="absolute top-8 bottom-2 inset-x-2 pointer-events-none ${isFaceCard ? 'flex items-center justify-center overflow-hidden' : ''}">
+            <div class="absolute top-7 bottom-1 inset-x-0 pointer-events-none overflow-hidden">
                 ${isFaceCard 
-                    ? `<img src="${faceImageSrc}" class="w-full h-full object-contain opacity-95 drop-shadow-sm" alt="Figura">`
+                    ? `<div class="w-full h-full flex items-center justify-center">
+                           <img src="${faceImageSrc}" class="w-full h-full object-contain opacity-95 drop-shadow-sm" alt="Figura">
+                       </div>`
                     : pipsHTML
                 }
             </div>
@@ -495,9 +491,10 @@ function closeWinModal() {
 }
 
 function onPointerDown(e) {
-    if (isAnimating) return;
-    // Solo clic izquierdo o toque táctil
-    if (e.button !== 0 && e.type !== 'touchstart') return;
+    if (isAnimating || isDragging) return; // Evita que se dispare si ya estamos arrastrando
+    
+    // Solo clic izquierdo (si es un ratón) o toque
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
 
     const cardEl = e.target.closest('.card:not(.empty-slot)');
     if (!cardEl) return;
@@ -511,100 +508,89 @@ function onPointerDown(e) {
 
     if (!col[cardIdx].faceUp) return;
 
-    // Verificar si la secuencia arrastrada es válida (descendente)
     for (let i = cardIdx; i < col.length - 1; i++) {
-        if (col[i].rank - 1 !== col[i+1].rank) {
-            return; // Secuencia inválida para arrastrar
-        }
+        if (col[i].rank - 1 !== col[i+1].rank) return;
     }
 
-    // Iniciar arrastre
     e.preventDefault(); 
     isDragging = true;
     dragOriginCol = colIdx;
     dragOriginIdx = cardIdx;
     draggedCardsData = col.slice(cardIdx);
 
-    const rect = cardEl.getBoundingClientRect();
-    // Soporte para touch y ratón
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    dragStartX = clientX;
-    dragStartY = clientY;
-    
-    dragOffsetX = clientX - rect.left;
-    dragOffsetY = clientY - rect.top;
+    // LIMPIEZA FORZADA: Si por algún error quedó un fantasma previo, lo aniquilamos
+    document.querySelectorAll('.drag-ghost').forEach(el => el.remove());
 
-    // Crear elemento fantasma
+    const rect = cardEl.getBoundingClientRect();
+    
+    // Con PointerEvents, e.clientX funciona perfecto tanto para dedo como para ratón
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+
     ghostEl = document.createElement('div');
     ghostEl.className = 'drag-ghost';
     ghostEl.style.width = `${cardEl.offsetWidth}px`;
-    ghostEl.style.left = `${clientX - dragOffsetX}px`;
-    ghostEl.style.top = `${clientY - dragOffsetY}px`;
+    ghostEl.style.left = `${e.clientX - dragOffsetX}px`;
+    ghostEl.style.top = `${e.clientY - dragOffsetY}px`;
 
     let currentTop = 0;
-    const visibleHeight = cardEl.offsetWidth * 0.28; // Aproximadamente el gap de solapamiento
+    const visibleHeight = cardEl.offsetWidth * 0.28; 
 
     const cardsInDom = colEl.querySelectorAll('.card');
     for (let i = cardIdx; i < col.length; i++) {
         const originalEl = cardsInDom[i];
         const clone = originalEl.cloneNode(true);
         
-        clone.className = `card face-up`; // Forzar render limpio sin clases de overlap
+        clone.className = `card face-up`; 
         clone.style.margin = '0';
         clone.style.position = 'absolute';
         clone.style.top = `${currentTop}px`;
         clone.style.left = '0';
         
         ghostEl.appendChild(clone);
-        originalEl.style.opacity = '0.3'; // Atenuar las originales
+        originalEl.style.opacity = '0.3'; 
         currentTop += visibleHeight;
     }
 
     document.body.appendChild(ghostEl);
 
+    // Escuchamos solo eventos Pointer
     document.addEventListener('pointermove', onPointerMove, {passive: false});
-    document.addEventListener('touchmove', onPointerMove, {passive: false});
     document.addEventListener('pointerup', onPointerUp);
-    document.addEventListener('touchend', onPointerUp);
-    document.addEventListener('pointercancel', onPointerUp);
-    document.addEventListener('touchcancel', onPointerUp);
+    document.addEventListener('pointercancel', onPointerUp); // Atrapa cancelaciones del sistema
 }
 
 function onPointerMove(e) {
     if (!isDragging || !ghostEl) return;
-    e.preventDefault(); // Evitar scroll
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    ghostEl.style.left = `${clientX - dragOffsetX}px`;
-    ghostEl.style.top = `${clientY - dragOffsetY}px`;
+    e.preventDefault(); 
+    ghostEl.style.left = `${e.clientX - dragOffsetX}px`;
+    ghostEl.style.top = `${e.clientY - dragOffsetY}px`;
 }
 
 function onPointerUp(e) {
     if (!isDragging) return;
 
+    // Retiramos los listeners
     document.removeEventListener('pointermove', onPointerMove);
-    document.removeEventListener('touchmove', onPointerMove);
     document.removeEventListener('pointerup', onPointerUp);
-    document.removeEventListener('touchend', onPointerUp);
+    document.removeEventListener('pointercancel', onPointerUp);
 
-    const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-    const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+    const clientX = e.clientX;
+    const clientY = e.clientY;
 
-    // Determinar columna de destino basándose en coordenadas
     let targetColIdx = -1;
     const cols = document.querySelectorAll('.tableau-col');
     
     cols.forEach(col => {
         const rect = col.getBoundingClientRect();
+        // Ampliamos un poco el área de detección para los dedos (top - 20)
         if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top - 20) {
             targetColIdx = parseInt(col.dataset.colIndex);
         }
     });
 
-    // Validar movimiento
     let moveValid = false;
     if (targetColIdx !== -1 && targetColIdx !== dragOriginCol) {
         const targetCol = tableau[targetColIdx];
@@ -620,12 +606,12 @@ function onPointerUp(e) {
         }
     }
 
+    // Lógica del auto-movimiento (Toque rápido)
     const moveDistance = Math.sqrt(Math.pow(clientX - dragStartX, 2) + Math.pow(clientY - dragStartY, 2));
-
+    
     if (targetColIdx === dragOriginCol && moveDistance < 10) {
         for (let i = 0; i < 10; i++) {
             if (i === dragOriginCol) continue;
-            
             const targetCol = tableau[i];
             const draggedTopCard = draggedCardsData[0];
 
@@ -641,13 +627,11 @@ function onPointerUp(e) {
     }
 
     if (moveValid) {
-        saveState(); // Guardamos el estado antes de aplicar el movimiento
-        // Aplicar movimiento
+        saveState(); 
         tableau[targetColIdx].push(...draggedCardsData);
         tableau[dragOriginCol].splice(dragOriginIdx, draggedCardsData.length);
         moves++;
 
-        // Voltear la carta inferior original si quedó boca abajo
         const sourceCol = tableau[dragOriginCol];
         if (sourceCol.length > 0 && !sourceCol[sourceCol.length - 1].faceUp) {
             sourceCol[sourceCol.length - 1].faceUp = true;
@@ -656,27 +640,27 @@ function onPointerUp(e) {
         updateUI();
     }
 
-    // Limpieza
+    // LIMPIEZA FINAL
     isDragging = false;
     dragOriginCol = -1;
     dragOriginIdx = -1;
     draggedCardsData = [];
+    
     if (ghostEl) {
         ghostEl.remove();
         ghostEl = null;
     }
+    // Doble barrido de seguridad
+    document.querySelectorAll('.drag-ghost').forEach(el => el.remove());
     
-    // Primero renderizamos para que checkSets use los elementos del DOM actualizados
     renderBoard(); 
 
-    // Luego verificamos si se completó alguna escalera para animarla
     if (moveValid) {
         checkSets();
     }
 }
 
+// INICIALIZACIÓN DE EVENTOS (Solo usamos pointerdown, eliminamos touchstart)
 document.getElementById('tableau').addEventListener('pointerdown', onPointerDown);
-document.getElementById('tableau').addEventListener('touchstart', onPointerDown, {passive: false});
 
-// Iniciar el juego al cargar la página
 window.onload = initGame;
