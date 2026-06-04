@@ -1,0 +1,113 @@
+:root {
+    --bg-body: #1e1e21;        /* Fondo principal oscuro suave */
+    --bg-header: #27272a;      /* Fondo de la barra superior */
+    --text-main: #a1a1aa;      /* Texto gris suave (sin blancos puros) */
+    --text-highlight: #d4d4d8; /* Texto un poco más claro para títulos */
+    --card-front: #ebe6da;     /* Fondo de carta boca arriba (crema clarito) */
+    --card-suit: #3f3f46;      /* Texto y palo oscuro para contraste suave en la carta */
+    --card-back: #353539;      /* Fondo de carta boca abajo */
+    --border-soft: #444448;    /* Bordes suaves */
+    --border-card: #d1ccbf;    /* Borde de cartas (crema un poco más oscuro) */
+    --suit-color: #8fa3c0;     /* Color azul/pizarra para las picas (bajo contraste) */
+    --empty-slot: #242427;     /* Ranura vacía */
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    user-select: none; /* Evitar selección de texto al arrastrar */
+    overflow-x: hidden;
+}
+
+.card {
+    width: 100%;
+    aspect-ratio: 1 / 1.4;
+    border-radius: 6px;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    transition: filter 0.2s;
+    cursor: pointer;
+}
+
+.card.face-up {
+    background-color: var(--card-front);
+    border: 1px solid var(--border-card);
+    /* Sombra superior e inferior para separar mejor las cartas apiladas */
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.4), 0 3px 6px rgba(0,0,0,0.3);
+}
+
+.card.dimmed {
+    /* Apaga las cartas que no forman parte de la secuencia arrastrable */
+    filter: brightness(0.65) saturate(0.85);
+}
+
+@keyframes hint-pulse {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-12px) scale(1.03); }
+}
+
+.hint-anim {
+    animation: hint-pulse 0.6s ease-in-out 2;
+    z-index: 50;
+    position: relative;
+    filter: brightness(1.2) drop-shadow(0 0 10px rgba(255,255,255,0.4)) !important;
+}
+
+.card.face-down {
+    background-color: var(--card-back);
+    border: 3px solid var(--card-front); /* Borde claro estilo naipe real */
+    /* Uso de la imagen proporcionada para el reverso */
+    background-image: url('Gemini_Generated_Image_gcazzwgcazzwgcaz.png');
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.card.empty-slot {
+    background-color: var(--empty-slot);
+    border: 2px dashed var(--border-soft);
+    cursor: default;
+}
+
+.suit-text { color: var(--text-highlight); }
+.suit-icon { color: var(--suit-color); }
+
+/* Colores específicos para el contenido de la carta boca arriba */
+.card.face-up .suit-text, 
+.card.face-up .suit-icon { 
+    color: var(--card-suit); 
+}
+
+/* Clases de solapamiento (Márgenes negativos para apilar cartas) */
+.overlap-down { margin-top: -128%; } /* Muestra solo un borde fino si está boca abajo */
+.overlap-up { margin-top: -112%; }   /* Muestra el rango y el palo si está boca arriba */
+
+/* Eliminar solapamiento en la primera carta de la columna */
+.tableau-col .card:first-child { margin-top: 0; }
+
+#tableau {
+    touch-action: none; /* Prevenir scroll nativo al arrastrar en móviles */
+}
+
+/* Contenedor fantasma para las cartas arrastradas */
+.drag-ghost {
+    position: fixed;
+    pointer-events: none; /* Permite detectar el elemento debajo */
+    z-index: 9999;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+}
+
+.drag-ghost .card {
+    position: absolute;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+/* Ocultar barra de scroll para estética limpia */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-body); }
+::-webkit-scrollbar-thumb { background: var(--border-soft); border-radius: 4px; }
