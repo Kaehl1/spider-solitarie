@@ -180,32 +180,29 @@ function createCardElement(card) {
                 // Envolvemos el patrón clásico para que solo se vea en PC (sm:block)
                 const desktopPattern = `<div class="hidden sm:block w-full h-full relative">${pips.join('')}</div>`;
                 
-                // --- 2. DISEÑO PARA MÓVIL (Una sola pica gigante) ---
-                // Se centra con Flexbox y solo se ve en móvil (sm:hidden)
+                // --- 2. DISEÑO PARA MÓVIL (Pica central reducida) ---
                 const mobilePattern = `
                     <div class="flex sm:hidden w-full h-full items-center justify-center">
-                        <span class="text-[clamp(2.5rem,10vw,4rem)] suit-icon leading-none">♠</span>
+                        <span class="text-[clamp(2rem,7vw,3rem)] suit-icon leading-none">♠</span>
                     </div>
                 `;
 
-                // Unimos ambos diseños
                 pipsHTML = desktopPattern + mobilePattern;
             }
         }
 
         el.innerHTML = `
-            <div class="absolute top-1 left-1 z-10">
+            <!-- Cambiamos top-1 por top-0.5 para pegarlo más al borde superior -->
+            <div class="absolute top-0.5 left-1 z-10">
                 <span class="text-[clamp(0.9rem,3vw,1.3rem)] font-bold suit-text leading-none">${getRankText(card.rank)}</span>
             </div>
-            <div class="absolute top-1 right-1 z-10">
+            <div class="absolute top-0.5 right-1 z-10">
                 <span class="text-[clamp(1.1rem,3.5vw,1.5rem)] suit-icon leading-none">♠</span>
             </div>
             
-            <div class="absolute top-7 bottom-1 inset-x-0 pointer-events-none overflow-hidden">
+            <div class="absolute top-5 sm:top-7 bottom-1 inset-x-0 pointer-events-none overflow-hidden flex items-center justify-center">
                 ${isFaceCard 
-                    ? `<div class="w-full h-full flex items-center justify-center">
-                           <img src="${faceImageSrc}" class="w-full h-full object-contain opacity-95 drop-shadow-sm" alt="Figura">
-                       </div>`
+                    ? `<img src="${faceImageSrc}" class="w-full h-full object-contain scale-125 sm:scale-100 opacity-95 drop-shadow-sm" alt="Figura">`
                     : pipsHTML
                 }
             </div>
@@ -536,7 +533,11 @@ function onPointerDown(e) {
     ghostEl.style.top = `${e.clientY - dragOffsetY}px`;
 
     let currentTop = 0;
-    const visibleHeight = cardEl.offsetWidth * 0.28; 
+    
+    // Calculamos el nuevo tamaño del escalón visual:
+    // Móvil (55% de visibilidad) y PC (40% de visibilidad)
+    const isMobile = window.innerWidth < 640;
+    const visibleHeight = cardEl.offsetWidth * (isMobile ? 0.55 : 0.40);
 
     const cardsInDom = colEl.querySelectorAll('.card');
     for (let i = cardIdx; i < col.length; i++) {

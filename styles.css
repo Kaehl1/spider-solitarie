@@ -99,9 +99,15 @@ header {
     color: var(--card-suit); 
 }
 
-/* Clases de solapamiento (Márgenes negativos para apilar cartas) */
-.overlap-down { margin-top: -128%; } /* Muestra solo un borde fino si está boca abajo */
-.overlap-up { margin-top: -112%; }   /* Muestra el rango y el palo si está boca arriba */
+/* Clases de solapamiento responsivas */
+.overlap-down { margin-top: -120%; } /* Un poco más de aire para las cartas boca abajo */
+.overlap-up { margin-top: -85%; }   /* Escalón mucho más grande en móviles (antes -95%) */
+
+@media (min-width: 640px) {
+    /* Ajustes para PC */
+    .overlap-down { margin-top: -125%; }
+    .overlap-up { margin-top: -100%; }  /* Escalón más grande en PC (antes -112%) */
+}
 
 /* Eliminar solapamiento en la primera carta de la columna */
 .tableau-col .card:first-child { margin-top: 0; }
