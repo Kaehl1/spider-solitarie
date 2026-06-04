@@ -44,4 +44,9 @@ Dado que es un proyecto puramente estático (Frontend), no necesitas instalar No
 
 1. **Clona este repositorio:**
 ```bash
-   git clone [https://github.com/TU_USUARIO/solitario-spider-vibecoding.git](https://github.com/TU_USUARIO/solitario-spider-vibecoding.git)
+```
+2. **Abre el juego:**
+
+Abre el archivo `index.html` directamente en tu navegador favorito.
+
+🔗 ¡O simplemente visita la versión en vivo! Puedes jugar directamente desde GitHub Pages.
