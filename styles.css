@@ -100,13 +100,13 @@ header {
 }
 
 /* Clases de solapamiento responsivas */
-.overlap-down { margin-top: -120%; } /* Un poco más de aire para las cartas boca abajo */
-.overlap-up { margin-top: -85%; }   /* Escalón mucho más grande en móviles (antes -95%) */
+.overlap-down { margin-top: -110%; } /* Más aire para las cartas boca abajo en móvil (antes -120%) */
+.overlap-up { margin-top: -70%; }   /* Escalón GIGANTE en móviles para que no se pise la sombra (antes -85%) */
 
 @media (min-width: 640px) {
-    /* Ajustes para PC */
+    /* Ajustes para PC se mantienen iguales */
     .overlap-down { margin-top: -125%; }
-    .overlap-up { margin-top: -100%; }  /* Escalón más grande en PC (antes -112%) */
+    .overlap-up { margin-top: -100%; }  
 }
 
 /* Eliminar solapamiento en la primera carta de la columna */

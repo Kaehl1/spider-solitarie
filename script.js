@@ -144,7 +144,7 @@ function createCardElement(card) {
         let faceImageSrc = '';
 
         if (card.rank === 13) {
-            faceImageSrc = './img/rey.png';
+            faceImageSrc = './img/rey.png'; // Recuerda poner la ruta correcta si las tienes en /img/
         } else if (card.rank === 12) {
             faceImageSrc = './img/reina.png';
         } else if (card.rank === 11) {
@@ -154,10 +154,14 @@ function createCardElement(card) {
         let pipsHTML = '';
         if (!isFaceCard) {
             if (card.rank === 1) {
-                // El As siempre tiene una sola pica gigante (PC y Móvil)
-                pipsHTML = `<div class="w-full h-full flex items-center justify-center"><span class="text-[clamp(3.5rem,6.5vw,5.5rem)] suit-icon leading-none">♠</span></div>`;
+                // Diseño dual para el As: Usamos leading-normal en lugar de none para que la pica respire y no se corte
+                pipsHTML = `
+                    <div class="w-full h-full flex items-center justify-center">
+                        <span class="hidden sm:block text-[clamp(3.5rem,6.5vw,5.5rem)] suit-icon leading-none">♠</span>
+                        <span class="block sm:hidden text-[clamp(2.5rem,8vw,3.5rem)] suit-icon leading-normal">♠</span>
+                    </div>`;
             } else {
-                // --- 1. DISEÑO PARA PC (Patrón clásico completo) ---
+                // --- 1. DISEÑO PARA PC ---
                 const addPip = (x, y, flip = false) => {
                     return `<span class="absolute suit-icon text-[clamp(1.2rem,2.8vw,1.8rem)] transform -translate-x-1/2 -translate-y-1/2 ${flip ? 'rotate-180' : ''} leading-none" style="left: ${x}%; top: ${y}%;">♠</span>`;
                 };
@@ -177,13 +181,13 @@ function createCardElement(card) {
                     case 10: pips.push(addPip(L, 14), addPip(R, 14), addPip(L, 38), addPip(R, 38), addPip(C, 26), addPip(C, 74, true), addPip(L, 62, true), addPip(R, 62, true), addPip(L, 86, true), addPip(R, 86, true)); break;
                 }
                 
-                // Envolvemos el patrón clásico para que solo se vea en PC (sm:block)
                 const desktopPattern = `<div class="hidden sm:block w-full h-full relative">${pips.join('')}</div>`;
                 
-                // --- 2. DISEÑO PARA MÓVIL (Pica central reducida) ---
+                // --- 2. DISEÑO PARA MÓVIL ---
+                // 'leading-normal' repara la punta cortada.
                 const mobilePattern = `
                     <div class="flex sm:hidden w-full h-full items-center justify-center">
-                        <span class="text-[clamp(2rem,7vw,3rem)] suit-icon leading-none">♠</span>
+                        <span class="text-[clamp(1.8rem,5.5vw,2.5rem)] suit-icon leading-normal">♠</span>
                     </div>
                 `;
 
@@ -192,17 +196,16 @@ function createCardElement(card) {
         }
 
         el.innerHTML = `
-            <!-- Cambiamos top-1 por top-0.5 para pegarlo más al borde superior -->
-            <div class="absolute top-0.5 left-1 z-10">
-                <span class="text-[clamp(0.9rem,3vw,1.3rem)] font-bold suit-text leading-none">${getRankText(card.rank)}</span>
+            <div class="absolute top-0.5 left-0.5 sm:left-1 z-10">
+                <span class="text-[clamp(0.75rem,2.5vw,1.2rem)] font-bold suit-text leading-none ${card.rank === 10 ? 'tracking-tighter' : ''}">${getRankText(card.rank)}</span>
             </div>
-            <div class="absolute top-0.5 right-1 z-10">
-                <span class="text-[clamp(1.1rem,3.5vw,1.5rem)] suit-icon leading-none">♠</span>
+            <div class="absolute top-0.5 right-0.5 sm:right-1 z-10">
+                <span class="text-[clamp(0.85rem,2.8vw,1.4rem)] suit-icon leading-none">♠</span>
             </div>
             
             <div class="absolute top-5 sm:top-7 bottom-1 inset-x-0 pointer-events-none overflow-hidden flex items-center justify-center">
                 ${isFaceCard 
-                    ? `<img src="${faceImageSrc}" class="w-full h-full object-contain scale-125 sm:scale-100 opacity-95 drop-shadow-sm" alt="Figura">`
+                    ? `<img src="${faceImageSrc}" class="w-full h-full object-contain scale-110 sm:scale-100 opacity-95 drop-shadow-sm" alt="Figura">`
                     : pipsHTML
                 }
             </div>
@@ -215,13 +218,18 @@ function renderStockAndFoundations() {
     const stockEl = document.getElementById('stock');
     if (stock.length > 0) {
         const dealsLeft = stock.length / 10;
-        stockEl.innerHTML = `
-            <div class="card face-down relative cursor-pointer hover:brightness-110 transition-all" onclick="dealStock()">
-                <div class="absolute inset-0 flex items-center justify-center font-bold text-lg text-[var(--text-main)] z-10 bg-black/20">
-                    ${dealsLeft}
-                </div>
-            </div>
-        `;
+        let stockHTML = '<div class="relative w-full h-full cursor-pointer hover:brightness-110 transition-transform hover:scale-105" onclick="dealStock()">';
+        
+        // Creamos las cartas visuales apilándolas en horizontal hacia la derecha
+        for(let i = 0; i < dealsLeft; i++) {
+            let posClass = i === 0 ? 'relative' : 'absolute top-0 left-0';
+            // Cambiamos el translate(x, y) por un translateX. Aumentamos a 4px para que se note bien el grosor de la baraja.
+            stockHTML += `
+                <div class="${posClass} card face-down shadow-md" style="transform: translateX(${i * 4}px); z-index: ${i}"></div>
+            `;
+        }
+        stockHTML += '</div>';
+        stockEl.innerHTML = stockHTML;
     } else {
         stockEl.innerHTML = `<div class="card empty-slot opacity-50"></div>`;
     }
@@ -257,72 +265,82 @@ function showToast(msg) {
 
 function showHint() {
     if (isAnimating) return;
+    
+    // Limpiamos animaciones previas por si el usuario pulsa repetidamente
+    document.querySelectorAll('.hint-anim').forEach(el => el.classList.remove('hint-anim'));
+    
     let possibleMoves = [];
     
     for (let srcCol = 0; srcCol < 10; srcCol++) {
         const col = tableau[srcCol];
         if (col.length === 0) continue;
         
-        // Buscar secuencias válidas desde abajo
-        for (let i = col.length - 1; i >= 0; i--) {
-            if (!col[i].faceUp) break;
+        // 1. Encontrar la RAÍZ de la secuencia móvil máxima (para NO partir escaleras)
+        let srcIdx = col.length - 1;
+        while (srcIdx > 0 && col[srcIdx - 1].faceUp && col[srcIdx - 1].rank - 1 === col[srcIdx].rank) {
+            srcIdx--;
+        }
+        
+        const topCard = col[srcIdx];
+        
+        // 2. Buscar el mejor destino para este grupo completo
+        for (let dstCol = 0; dstCol < 10; dstCol++) {
+            if (srcCol === dstCol) continue;
+            const targetCol = tableau[dstCol];
             
-            let isValidSeq = true;
-            for (let j = i; j < col.length - 1; j++) {
-                if (col[j].rank - 1 !== col[j+1].rank) {
-                    isValidSeq = false;
-                    break;
+            if (targetCol.length === 0) {
+                // Mover a hueco vacío. Solo es óptimo si al hacerlo descubrimos una carta boca abajo
+                if (srcIdx > 0) {
+                    possibleMoves.push({srcCol, srcIdx, dstCol, score: 1});
                 }
-            }
-            
-            if (isValidSeq) {
-                const topCard = col[i];
-                
-                // Buscar destino
-                for (let dstCol = 0; dstCol < 10; dstCol++) {
-                    if (srcCol === dstCol) continue;
-                    const targetCol = tableau[dstCol];
-                    
-                    if (targetCol.length === 0) {
-                        // Mover a espacio vacío puntúa si revelamos carta
-                        if (i > 0) possibleMoves.push({srcCol, srcIdx: i, score: 1});
-                    } else {
-                        const targetTopCard = targetCol[targetCol.length - 1];
-                        if (targetTopCard.rank - 1 === topCard.rank) {
-                            let score = 5; 
-                            if (i > 0 && !col[i-1].faceUp) score += 10; // Prioriza revelar cartas
-                            possibleMoves.push({srcCol, srcIdx: i, score});
-                        }
-                    }
+            } else {
+                const targetTopCard = targetCol[targetCol.length - 1];
+                if (targetTopCard.rank - 1 === topCard.rank) {
+                    let score = 10; // Buen movimiento (conectar cartas)
+                    // Puntos extra (movimiento perfecto) si además revelamos una carta nueva
+                    if (srcIdx > 0 && !col[srcIdx - 1].faceUp) score += 5; 
+                    possibleMoves.push({srcCol, srcIdx, dstCol, score});
                 }
             }
         }
     }
     
     if (possibleMoves.length > 0) {
-        // Ordenar por mejor puntuación
+        // Ordenar del movimiento más óptimo al menos óptimo
         possibleMoves.sort((a, b) => b.score - a.score);
         const bestMove = possibleMoves[0];
         
-        // Animar el grupo
-        const colEl = document.querySelector(`.tableau-col[data-col-index="${bestMove.srcCol}"]`);
-        const cards = colEl.querySelectorAll('.card');
-        for (let i = bestMove.srcIdx; i < cards.length; i++) {
-            cards[i].classList.add('hint-anim');
+        // Animar el grupo de origen al completo
+        const srcColEl = document.querySelector(`.tableau-col[data-col-index="${bestMove.srcCol}"]`);
+        const srcCards = srcColEl.querySelectorAll('.card');
+        for (let i = bestMove.srcIdx; i < srcCards.length; i++) {
+            srcCards[i].classList.add('hint-anim');
         }
+
+        // Animar la carta destino (o el hueco vacío) para guiar el ojo del jugador
+        const dstColEl = document.querySelector(`.tableau-col[data-col-index="${bestMove.dstCol}"]`);
+        const dstCard = dstColEl.lastElementChild;
+        if (dstCard) dstCard.classList.add('hint-anim');
+
+        // Retirar la animación tras 1.2 segundos
         setTimeout(() => {
-            for (let i = bestMove.srcIdx; i < cards.length; i++) {
-                cards[i].classList.remove('hint-anim');
-            }
+            document.querySelectorAll('.hint-anim').forEach(el => el.classList.remove('hint-anim'));
         }, 1200);
+        
     } else {
-        showToast("No hay movimientos obvios. Toca el mazo para repartir.");
+        // Si no hay movimientos de escaleras completas, buscar el mazo
+        const stockEl = document.getElementById('stock');
+        if (stock.length > 0) {
+            stockEl.classList.add('hint-anim');
+            setTimeout(() => stockEl.classList.remove('hint-anim'), 1200);
+        } else {
+            showToast("No hay movimientos posibles y el mazo está vacío.");
+        }
     }
 }
 
 function dealStock() {
     if (isAnimating) return;
-    // Se eliminó la restricción de columnas vacías: ahora puedes repartir siempre
     if (stock.length === 0) return;
 
     isAnimating = true;
@@ -335,8 +353,12 @@ function dealStock() {
         cardsToDeal.push(stock.pop());
     }
 
+    // Calculamos si es móvil o PC para que la animación sepa exactamente dónde aterrizar
+    const isMobile = window.innerWidth < 640;
+
     let animationsCompleted = 0;
 
+    // Calculamos los destinos de todas las cartas ANTES de empezar a moverlas
     for (let i = 0; i < 10; i++) {
         const card = cardsToDeal[i];
         card.faceUp = true;
@@ -352,10 +374,10 @@ function dealStock() {
         flyingCard.style.margin = '0';
         document.body.appendChild(flyingCard);
 
-        // Reflujo
+        // Forzamos al navegador a registrar la posición inicial (Reflujo)
         flyingCard.offsetHeight;
 
-        // Destino
+        // Calculamos el destino final
         const targetCol = document.querySelectorAll('.tableau-col')[i];
         const lastCardInCol = targetCol.lastElementChild;
         let targetRect = targetCol.getBoundingClientRect();
@@ -364,27 +386,35 @@ function dealStock() {
 
         if (lastCardInCol && !lastCardInCol.classList.contains('empty-slot')) {
             const lastCardRect = lastCardInCol.getBoundingClientRect();
-            destTop = lastCardRect.top + (targetCol.offsetWidth * 0.28);
+            // Usamos los mismos porcentajes de solapamiento que tenemos en el Drag & Drop (70% móvil, 40% PC)
+            const visibleHeight = targetCol.offsetWidth * (isMobile ? 0.70 : 0.40);
+            destTop = lastCardRect.top + visibleHeight;
         }
 
-        // Stagger de la animación
+        // Aplicamos el retraso progresivo (Stagger) de 80ms a cada carta
         setTimeout(() => {
             flyingCard.style.left = `${destLeft}px`;
             flyingCard.style.top = `${destTop}px`;
 
+            // Una vez que el vuelo termina (400ms después)...
             setTimeout(() => {
-                flyingCard.remove();
-                tableau[i].push(card);
+                flyingCard.remove();            // 1. Borramos la carta falsa que estaba volando
+                tableau[i].push(card);          // 2. Metemos la carta en la lógica de esa columna
+                
+                renderBoard();                  // 3. ¡MAGIA! Renderizamos el tablero para que la carta real aparezca al instante
+
                 animationsCompleted++;
                 
                 if (animationsCompleted === 10) {
-                    isAnimating = false; // Liberamos la animación
-                    renderBoard();       // Renderizamos para actualizar el DOM
-                    checkSets();         // Chequeamos si el reparto completó una escalera
+                    isAnimating = false; // Liberamos los controles cuando aterriza la última
+                    checkSets();         // Chequeamos si el reparto completó una escalera por casualidad
                 }
             }, 400); 
         }, i * 80); 
     }
+    
+    // Renderizamos el mazo al principio para que el montón visual disminuya en el momento del clic
+    renderStockAndFoundations();
 }
 
 function checkSets() {
@@ -535,9 +565,9 @@ function onPointerDown(e) {
     let currentTop = 0;
     
     // Calculamos el nuevo tamaño del escalón visual:
-    // Móvil (55% de visibilidad) y PC (40% de visibilidad)
+    // Móvil (70% de visibilidad por el margin -70%) y PC (40% de visibilidad)
     const isMobile = window.innerWidth < 640;
-    const visibleHeight = cardEl.offsetWidth * (isMobile ? 0.55 : 0.40);
+    const visibleHeight = cardEl.offsetWidth * (isMobile ? 0.70 : 0.40);
 
     const cardsInDom = colEl.querySelectorAll('.card');
     for (let i = cardIdx; i < col.length; i++) {
@@ -607,23 +637,47 @@ function onPointerUp(e) {
         }
     }
 
-    // Lógica del auto-movimiento (Toque rápido)
+    // Lógica del auto-movimiento inteligente (Toque rápido)
     const moveDistance = Math.sqrt(Math.pow(clientX - dragStartX, 2) + Math.pow(clientY - dragStartY, 2));
     
     if (targetColIdx === dragOriginCol && moveDistance < 10) {
+        let bestTargetIdx = -1;
+        let bestScore = -1;
+        const draggedTopCard = draggedCardsData[0];
+
         for (let i = 0; i < 10; i++) {
             if (i === dragOriginCol) continue;
             const targetCol = tableau[i];
-            const draggedTopCard = draggedCardsData[0];
 
             if (targetCol.length > 0) {
                 const targetTopCard = targetCol[targetCol.length - 1];
                 if (targetTopCard.rank - 1 === draggedTopCard.rank) {
-                    targetColIdx = i;
-                    moveValid = true;
-                    break;
+                    // Calculamos la puntuación: ¿qué tan larga es la escalera limpia en el destino?
+                    let seqLength = 1;
+                    for (let j = targetCol.length - 1; j > 0; j--) {
+                        if (targetCol[j-1].faceUp && targetCol[j-1].rank - 1 === targetCol[j].rank) {
+                            seqLength++;
+                        } else {
+                            break; // Se rompe la escalera (o llega a carta gris)
+                        }
+                    }
+                    // Si encontramos un destino con una escalera mayor, lo elegimos
+                    if (seqLength > bestScore) {
+                        bestScore = seqLength;
+                        bestTargetIdx = i;
+                    }
                 }
+            } else if (bestScore === -1) {
+                // Las columnas vacías son válidas, pero tienen la peor puntuación.
+                // Solo irán aquí si no hay cartas válidas donde apilarse.
+                bestScore = 0;
+                bestTargetIdx = i;
             }
+        }
+
+        if (bestTargetIdx !== -1) {
+            targetColIdx = bestTargetIdx;
+            moveValid = true;
         }
     }
 

@@ -6,24 +6,28 @@
 
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="img/rey.png">
+    <link rel="apple-touch-icon" href="img/rey.png">
     <title>Solitario Spider (Picas)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style></style>
 </head>
 <body class="h-screen flex flex-col">
 
-    <header class="bg-[var(--bg-header)] border-b border-[var(--border-soft)] p-3 sm:p-4 flex justify-between items-center z-10 shrink-0">
+    <header class="bg-[var(--bg-header)] border-b border-[var(--border-soft)] p-3 sm:p-4 flex justify-between items-center z-20 shrink-0 relative">
         <h1 class="text-lg sm:text-xl font-bold tracking-wide text-[var(--text-highlight)] flex items-center gap-2">
             Spider <span class="suit-icon text-xl">♠</span>
         </h1>
         <div class="flex items-center gap-2 sm:gap-4">
             <div class="text-xs sm:text-sm mr-2">Movimientos: <span id="moves-count" class="font-mono text-[var(--text-highlight)]">0</span></div>
-            <button onclick="showHint()" class="text-xs sm:text-sm bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] px-3 py-1.5 rounded transition-colors text-[var(--text-highlight)] flex items-center gap-1">
-                <span>💡</span> <span class="hidden xs:inline">Pista</span>
+            
+            <button onclick="showHint()" class="hidden sm:flex text-sm bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] px-3 py-1.5 rounded transition-colors text-[var(--text-highlight)] items-center gap-1">
+                <span>💡</span> <span>Pista</span>
             </button>
-            <button onclick="undo()" class="text-xs sm:text-sm bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] px-3 py-1.5 rounded transition-colors text-[var(--text-highlight)] flex items-center gap-1">
-                <span>↩</span> <span class="hidden xs:inline">Deshacer</span>
+            <button onclick="undo()" class="hidden sm:flex text-sm bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] px-3 py-1.5 rounded transition-colors text-[var(--text-highlight)] items-center gap-1">
+                <span>↩</span> <span>Deshacer</span>
             </button>
+            
             <button onclick="initGame()" class="text-xs sm:text-sm bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] px-3 py-1.5 rounded transition-colors text-[var(--text-highlight)]">
                 Reiniciar
             </button>
@@ -33,21 +37,27 @@
     <main class="flex-1 overflow-y-auto overflow-x-hidden p-2 sm:p-4 relative">
         <div class="max-w-5xl mx-auto w-full h-full flex flex-col">
             
-            <!-- Fila Superior: Mazo y Fundaciones -->
-            <div class="flex justify-between items-start mb-4 sm:mb-8 h-20 sm:h-28 shrink-0">
-                <!-- Mazo (Stock) -->
+            <div class="flex justify-between items-start mb-4 sm:mb-8 h-20 sm:h-28 shrink-0 relative z-10">
                 <div id="stock" class="w-[9%] min-w-[32px]"></div>
 
-                <!-- Fundaciones (Pilas completadas) -->
                 <div id="foundations" class="w-[85%] flex justify-end gap-1 sm:gap-2"></div>
             </div>
 
-            <!-- Columnas (Tableau) -->
-            <div id="tableau" class="grid grid-cols-10 gap-1 sm:gap-2 pb-20 flex-1">
-                <!-- Generado por JS -->
-            </div>
+            <div id="tableau" class="grid grid-cols-10 gap-1 sm:gap-2 pb-28 sm:pb-20 flex-1 relative z-0">
+                </div>
         </div>
     </main>
+
+    <div class="sm:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-header)] border-t border-[var(--border-soft)] p-3 flex justify-center gap-3 z-40 backdrop-blur-md pb-safe">
+        <button onclick="showHint()" class="flex-1 max-w-[160px] bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] text-[var(--text-highlight)] py-3 px-2 rounded-xl transition-colors flex justify-center items-center gap-2 shadow-lg">
+            <span class="text-xl leading-none">💡</span> 
+            <span class="font-semibold text-sm">Pista</span>
+        </button>
+        <button onclick="undo()" class="flex-1 max-w-[160px] bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] text-[var(--text-highlight)] py-3 px-2 rounded-xl transition-colors flex justify-center items-center gap-2 shadow-lg">
+            <span class="text-xl leading-none">↩</span> 
+            <span class="font-semibold text-sm">Deshacer</span>
+        </button>
+    </div>
 
     <!-- Toast para mensajes -->
     <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[var(--border-soft)] text-[var(--text-highlight)] px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50 text-sm">

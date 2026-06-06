@@ -1,15 +1,16 @@
 {
-     "name": "Spider Solitaire Picas",
-     "short_name": "Spider Picas",
-     "start_url": "./",
-     "display": "standalone",
-     "background_color": "#1e1e21",
-     "theme_color": "#27272a",
-     "icons": [
-       {
-         "src": "Gemini_Generated_Image_gcazzwgcazzwgcaz.png",
-         "sizes": "192x192",
-         "type": "image/png"
-       }
-     ]
-   }
+  "name": "Spider Solitaire Picas",
+  "short_name": "Spider Picas",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1e1e21",
+  "theme_color": "#27272a",
+  "icons": [
+    {
+      "src": "img/rey.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
