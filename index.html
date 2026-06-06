@@ -6,8 +6,10 @@
 
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
+    
     <link rel="icon" type="image/png" href="img/rey.png">
     <link rel="apple-touch-icon" href="img/rey.png">
+    
     <title>Solitario Spider (Picas)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style></style>
@@ -35,7 +37,22 @@
     </header>
 
     <main class="flex-1 overflow-y-auto overflow-x-hidden p-2 sm:p-4 relative">
-        <div class="max-w-5xl mx-auto w-full h-full flex flex-col">
+        
+        <aside class="hidden 2xl:flex absolute left-6 top-6 w-64 flex-col bg-[var(--bg-header)] border border-[var(--border-soft)] rounded-xl p-5 shadow-xl backdrop-blur-sm z-20">
+            <h2 class="text-lg font-bold text-[var(--text-highlight)] mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Cómo jugar
+            </h2>
+            <div class="text-sm text-[var(--text-main)] space-y-3 leading-relaxed">
+                <p><strong>Objetivo:</strong> Ordenar las cartas en 8 escaleras completas desde el Rey (K) hasta el As (A).</p>
+                <p><strong>Movimientos:</strong> Apila cartas sobre una de valor exactamente superior (ej. el 6 va sobre el 7).</p>
+                <p><strong>Secuencias:</strong> Puedes arrastrar grupos de cartas que ya estén ordenadas a la vez.</p>
+                <p><strong>Huecos vacíos:</strong> Úsalos para colocar cualquier carta o secuencia que te estorbe.</p>
+                <p><strong>Repartir:</strong> Toca el mazo (arriba a la izquierda) para repartir 10 nuevas cartas si te atascas.</p>
+            </div>
+        </aside>
+
+        <div class="max-w-5xl mx-auto w-full h-full flex flex-col relative z-10">
             
             <div class="flex justify-between items-start mb-4 sm:mb-8 h-20 sm:h-28 shrink-0 relative z-10">
                 <div id="stock" class="w-[9%] min-w-[32px]"></div>
@@ -48,23 +65,10 @@
         </div>
     </main>
 
-    <div class="sm:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-header)] border-t border-[var(--border-soft)] p-3 flex justify-center gap-3 z-40 backdrop-blur-md pb-safe">
-        <button onclick="showHint()" class="flex-1 max-w-[160px] bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] text-[var(--text-highlight)] py-3 px-2 rounded-xl transition-colors flex justify-center items-center gap-2 shadow-lg">
-            <span class="text-xl leading-none">💡</span> 
-            <span class="font-semibold text-sm">Pista</span>
-        </button>
-        <button onclick="undo()" class="flex-1 max-w-[160px] bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] text-[var(--text-highlight)] py-3 px-2 rounded-xl transition-colors flex justify-center items-center gap-2 shadow-lg">
-            <span class="text-xl leading-none">↩</span> 
-            <span class="font-semibold text-sm">Deshacer</span>
-        </button>
-    </div>
-
-    <!-- Toast para mensajes -->
     <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[var(--border-soft)] text-[var(--text-highlight)] px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50 text-sm">
         Mensaje
     </div>
 
-    <!-- Modal de Victoria -->
     <div id="win-modal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center z-50 backdrop-blur-sm">
         <div class="bg-[var(--bg-header)] p-8 rounded-xl shadow-2xl text-center border border-[var(--border-soft)] max-w-sm w-full mx-4">
             <div class="text-6xl mb-4 suit-icon">♠</div>
@@ -74,6 +78,41 @@
                 Jugar de nuevo
             </button>
         </div>
+    </div>
+
+    <div id="info-modal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-[var(--bg-header)] p-6 rounded-xl shadow-2xl border border-[var(--border-soft)] max-w-sm w-full mx-4">
+            <h2 class="text-xl font-bold mb-4 text-[var(--text-highlight)] flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Cómo jugar
+            </h2>
+            <div class="text-sm text-[var(--text-main)] space-y-3 leading-relaxed mb-6 text-left">
+                <p><strong>Objetivo:</strong> Ordenar las cartas en 8 escaleras completas (de K a A).</p>
+                <p><strong>Movimientos:</strong> Mueve cartas sobre una de valor exactamente superior (ej. 6 sobre 7).</p>
+                <p><strong>Arrastrar:</strong> Puedes mover secuencias válidas completas al mismo tiempo.</p>
+                <p><strong>Huecos vacíos:</strong> Puedes colocar cualquier carta en ellos.</p>
+                <p><strong>Repartir:</strong> Toca el mazo arriba a la izquierda para repartir cartas si te atascas.</p>
+            </div>
+            <button onclick="closeInfoModal()" class="w-full bg-[var(--border-soft)] hover:bg-[var(--border-card)] text-[var(--text-highlight)] font-semibold py-2.5 px-6 rounded-lg transition-colors">
+                ¡Entendido!
+            </button>
+        </div>
+    </div>
+
+    <div class="sm:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-header)] border-t border-[var(--border-soft)] p-3 flex justify-center items-center gap-2 z-40 backdrop-blur-md pb-safe">
+        
+        <button onclick="openInfoModal()" class="w-12 h-[50px] shrink-0 bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] text-[var(--text-highlight)] rounded-xl transition-colors flex justify-center items-center shadow-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </button>
+        
+        <button onclick="showHint()" class="flex-1 max-w-[160px] h-[50px] bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] text-[var(--text-highlight)] rounded-xl transition-colors flex justify-center items-center gap-2 shadow-lg">
+            <span class="text-xl leading-none">💡</span> 
+            <span class="font-semibold text-sm">Pista</span>
+        </button>
+        <button onclick="undo()" class="flex-1 max-w-[160px] h-[50px] bg-[var(--bg-body)] hover:bg-[var(--border-soft)] border border-[var(--border-soft)] text-[var(--text-highlight)] rounded-xl transition-colors flex justify-center items-center gap-2 shadow-lg">
+            <span class="text-xl leading-none">↩</span> 
+            <span class="font-semibold text-sm">Deshacer</span>
+        </button>
     </div>
     
     <script src="script.js"></script>

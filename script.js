@@ -517,6 +517,15 @@ function closeWinModal() {
     initGame();
 }
 
+// Controles del Modal de Información
+function openInfoModal() {
+    document.getElementById('info-modal').classList.remove('hidden');
+}
+
+function closeInfoModal() {
+    document.getElementById('info-modal').classList.add('hidden');
+}
+
 function onPointerDown(e) {
     if (isAnimating || isDragging) return; // Evita que se dispare si ya estamos arrastrando
     
